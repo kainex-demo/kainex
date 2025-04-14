@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kainex Profil</title>
+    <script>
+        // Firebase-Konfiguration (aus deinem Projekt holen)
+        const firebaseConfig = {
+            apiKey: "DEINE_API_KEY",
+            authDomain: "kainex-7bb56.firebaseapp.com",
+            databaseURL: "https://kainex-7bb56-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "kainex-7bb56",
+            storageBucket: "kainex-7bb56.appspot.com",
+            messagingSenderId: "686090227329"
+        };
+        
+        // Firebase initialisieren
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Modus aus der URL lesen (z.B. ...?mode=I&id=7bb56)
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode'); // "I", "D", "B", etc.
+        const userId = urlParams.get('id'); // "7bb56"
+
+        // Daten aus Firebase laden
+        function loadProfile() {
+            const modeName = getModeName(mode); // "incognito", "dating", etc.
+            database.ref(`users/${userId}/${modeName}`).once('value').then((snapshot) => {
+                const data = snapshot.val();
+                document.getElementById("name").textContent = data.name;
+                document.getElementById("phone").href = `tel:${data.phone}`;
+                document.getElementById("phone").textContent = data.phone;
+                // Weitere Felder je nach Modus
+                if (mode === 'I') {
+                    document.getElementById("snap").textContent = data.snap;
+                }
+            });
+        }
+
+        function getModeName(modeChar) {
+            const modes = { 
+                'I': 'incognito', 
+                'D': 'dating', 
+                'B': 'business', 
+                'N': 'networking' 
+            };
+            return modes[modeChar];
+        }
+
+        // Seite lädt
+        window.onload = loadProfile;
+    </script>
+</head>
+<body>
+    <h1>Kainex Profil</h1>
+    <p>Name: <span id="name"></span></p>
+    <p>Telefon: <a id="phone"></a></p>
+    <p id="snap" style="display:none;">Snapchat: <span id="snap-value"></span></p>
+</body>
+</html>
